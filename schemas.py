@@ -1,14 +1,18 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 
-class AllArticles(BaseModel):
-    id: int
+class ArticleBase(BaseModel):
     title: str
-    created_at: str
 
 
-class Article(AllArticles):
+class ArticleCreate(ArticleBase):
     content: str
+
+
+class Article(ArticleCreate):
+    id: int
+    created_at: datetime
 
 
 class UserBase(BaseModel):
