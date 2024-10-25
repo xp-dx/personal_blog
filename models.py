@@ -29,6 +29,7 @@ class User(Base):
     username = Column(String(50), nullable=False, unique=True)
     hashed_password = Column(Text, nullable=False)
     disabled = Column(Boolean, default=False)
+    is_superuser = Column(Boolean, default=False)
 
 
 # fake_users_db = {

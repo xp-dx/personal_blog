@@ -28,6 +28,10 @@ class User(UserBase):
     disabled: bool = False
 
 
+class Admin(User):
+    is_superuser: bool = False
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str

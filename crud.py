@@ -1,8 +1,15 @@
 from sqlalchemy.orm import Session
 
-from . import models, schemas, database
+from . import models, schemas, config
 from .password_hashing import get_password_hash, verify_password
 import json
+from datetime import timedelta, datetime, timezone
+import jwt
+from typing import Annotated
+
+
+def get_user_by_username(db: Session, username: str):
+    return db.query(models.User).filter(models.User.username == username).first()
 
 
 def authenticate_user(db: Session, username: str, password: str):
@@ -14,12 +21,15 @@ def authenticate_user(db: Session, username: str, password: str):
     return user
 
 
-def create_access_token():
-    pass
-
-
-def get_user_by_username(db: Session, username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=5)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, config.SECRET_KEY, algorithm=config.ALGORITHM)
+    return encoded_jwt
 
 
 def get_article_by_title(db: Session, title: str):
@@ -36,6 +46,9 @@ def get_all_articles(db: Session):
     for article in articles:
         articles_json.append({"title": article[0], "created_at": article[1]})
     return json.loads(json.dumps(articles_json, default=str))
+
+
+# def get_current_user(token: Annotated[str, Depends()])
 
 
 def create_user(db: Session, user: schemas.UserCreate):

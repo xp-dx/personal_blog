@@ -1,16 +1,15 @@
 from fastapi import FastAPI, HTTPException, status, Depends
-from . import models, schemas, crud
+from . import models, schemas, crud, config
 from datetime import datetime, timedelta
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
-import os
-from dotenv import load_dotenv
+import jwt
+from jwt.exceptions import InvalidTokenError
 
-load_dotenv()
 
-app = FastAPI()
+app = FastAPI(title="Personal Blog")
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -28,9 +27,10 @@ def get_db():
 @app.post("/token")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Session = Depends(get_db),
 ) -> schemas.Token:
     user = crud.authenticate_user(
-        models.fake_users_db, form_data.username, form_data.password
+        db=db, username=form_data.username, password=form_data.password
     )
     if not user:
         raise HTTPException(
@@ -38,13 +38,42 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(
-        minutes=int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES"))
-    )
+    access_token_expires = timedelta(minutes=int(config.ACCESS_TOKEN_EXPIRE_MINUTES))
     access_token = crud.create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     return schemas.Token(access_token=access_token, token_type="bearer")
+
+
+def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(get_db)
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, config.SECRET_KEY, algorithms=[config.ALGORITHM])
+        username = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = schemas.TokenData(username=username)
+
+    except InvalidTokenError:
+        raise credentials_exception
+    user = crud.get_user_by_username(db, username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+
+def get_current_active_user(
+    current_user: Annotated[schemas.User, Depends(get_current_user)]
+):
+    if current_user.disabled:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
 
 
 @app.get("/admin")
@@ -63,8 +92,11 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @app.delete("/user/delete/", tags=["users"])
-def delete_user(user: schemas.UserBase, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_username(db, username=user.username)
+def delete_user(
+    current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
+):
+    db_user = crud.get_user_by_username(db, username=current_user.username)
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User doesn't exist"
@@ -87,7 +119,13 @@ async def article(article_id: int):
 
 
 @app.post("/new", tags=["articles"])
-async def new(article: schemas.ArticleCreate, db: Session = Depends(get_db)):
+async def new(
+    article: schemas.ArticleCreate,
+    current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
+):
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     db_article = crud.get_article_by_title(db, title=article.title)
     if db_article:
         raise HTTPException(status_code=404, detail="Article already exists")
@@ -96,8 +134,13 @@ async def new(article: schemas.ArticleCreate, db: Session = Depends(get_db)):
 
 @app.patch("/edit/{article_id}", tags=["articles"])
 async def edit(
-    article_id: int, new_article: schemas.ArticleCreate, db: Session = Depends(get_db)
+    article_id: int,
+    new_article: schemas.ArticleCreate,
+    current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
 ):
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     db_article = crud.get_article_by_id(db, id=article_id)
     if not db_article:
         raise HTTPException(
@@ -106,11 +149,24 @@ async def edit(
     return crud.update_article(db=db, article=db_article, new_article=new_article)
 
 
-@app.delete("/article/delete/", tags=["articles"])
-def delete_user(article: schemas.ArticleBase, db: Session = Depends(get_db)):
-    db_article = crud.get_article_by_title(db, title=article.title)
+@app.delete("/delete/{article_id}/", tags=["articles"])
+def delete_user(
+    article_id: int,
+    current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
+    db: Session = Depends(get_db),
+):
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    db_article = crud.get_article_by_id(db, id=article_id)
     if not db_article:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Article doesn't exist"
         )
     return crud.delete_article(db=db, db_article=db_article)
+
+
+@app.get("/users/me/", response_model=schemas.Admin)
+async def read_users_me(
+    current_user: Annotated[schemas.User, Depends(get_current_user)],
+):
+    return current_user
