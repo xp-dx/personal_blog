@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h1>Personal Blog</h1>
+    {% for article in articles %}
+        <p><b>{{ article.title }}</b> {{ article.created_at }}</p>
+        
+    {% endfor %}
+</body>
+</html>
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prsonal blog</title>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/home">Home</a></li>
+            <li><a href="/new">New</a></li>
+        </ul>
+    </nav>
+    <hr>
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html> -->

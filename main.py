@@ -1,15 +1,19 @@
-from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi import FastAPI, HTTPException, Request, status, Depends
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from . import models, schemas, crud, config
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Annotated
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
 import jwt
 from jwt.exceptions import InvalidTokenError
+from jinja2 import Template
 
 
 app = FastAPI(title="Personal Blog")
+templates = Jinja2Templates(directory="./personal_blog/templates")
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -105,8 +109,28 @@ def delete_user(
 
 
 @app.get("/home", tags=["articles"])
-async def home(db: Session = Depends(get_db)):
-    return crud.get_all_articles(db=db)
+async def home(request: Request, db: Session = Depends(get_db)):
+    articles = crud.get_all_articles(db=db)
+    return templates.TemplateResponse(
+        "home.html", {"request": request, "articles": articles}
+    )
+
+
+# @app.get("/home", tags=["articles"])
+# async def home(db: Session = Depends(get_db)):
+#     articles = crud.get_all_articles(db=db)
+#     template = Template(
+#         open(
+#             "/home/akito/code/pet_projects/personal_blog/templates/home.html", "r"
+#         ).read()
+#     )
+#     html_content = template.render(articles=articles)
+#     return HTMLResponse(content=html_content, status_code=200)
+
+
+# @app.get("/home", tags=["articles"])
+# async def home(db: Session = Depends(get_db)):
+#     return crud.get_all_articles(db=db)
 
 
 @app.get("/article/{article_id}", tags=["articles"])

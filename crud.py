@@ -48,9 +48,6 @@ def get_all_articles(db: Session):
     return json.loads(json.dumps(articles_json, default=str))
 
 
-# def get_current_user(token: Annotated[str, Depends()])
-
-
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = get_password_hash(user.password)
     db_user = models.User(username=user.username, hashed_password=hashed_password)
@@ -89,11 +86,3 @@ def update_article(
     db.commit()
     db.refresh(article)
     return article
-
-
-# session.add(c1)
-# # session.add(c2)
-
-# print(session.new)
-
-# session.commit()
