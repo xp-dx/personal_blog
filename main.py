@@ -1,5 +1,5 @@
-from fastapi import FastAPI, HTTPException, Request, status, Depends
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException, Request, status, Depends, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from . import models, schemas, crud, config
 from datetime import timedelta
@@ -9,12 +9,19 @@ from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
 import jwt
 from jwt.exceptions import InvalidTokenError
-from jinja2 import Template
+
+# from jinja2 import Template
+
+# from fastapi.exceptions import WebSocketException
 
 
 app = FastAPI(title="Personal Blog")
 templates = Jinja2Templates(directory="./personal_blog/templates")
-
+credentials_exception = HTTPException(
+    status_code=status.HTTP_401_UNAUTHORIZED,
+    detail="Could not validate credentials",
+    headers={"WWW-Authenticate": "Bearer"},
+)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 models.Base.metadata.create_all(engine)
@@ -40,7 +47,7 @@ async def login_for_access_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
+            headers={"WWW-Authenticate": "Bearer", "Location": "/login"},
         )
     access_token_expires = timedelta(minutes=int(config.ACCESS_TOKEN_EXPIRE_MINUTES))
     access_token = crud.create_access_token(
@@ -55,7 +62,7 @@ def get_current_user(
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+        headers={"WWW-Authenticate": "Bearer", "Location": "/login"},
     )
     try:
         payload = jwt.decode(token, config.SECRET_KEY, algorithms=[config.ALGORITHM])
@@ -80,12 +87,19 @@ def get_current_active_user(
     return current_user
 
 
-@app.get("/admin")
-async def admin():
+@app.get("/admin", tags=["admin"])
+async def admin(
+    current_user: Annotated[schemas.User, Depends(get_current_user)],
+    db: Session = Depends(get_db),
+):
+    if not current_user:
+        return RedirectResponse(url="/login")
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     return {"message": "Hello Admin"}
 
 
-@app.post("/user/create/", tags=["users"], response_model=schemas.User)
+@app.post("/user/create/", tags=["users", "admin"], response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_username(db, username=user.username)
     if db_user:
@@ -95,7 +109,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user=user)
 
 
-@app.delete("/user/delete/", tags=["users"])
+@app.delete("/user/delete/", tags=["users", "admin"])
 def delete_user(
     current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
     db: Session = Depends(get_db),
@@ -108,7 +122,7 @@ def delete_user(
     return crud.delete_user(db=db, db_user=db_user)
 
 
-@app.get("/home", tags=["articles"])
+@app.get("/home", response_class=HTMLResponse, tags=["articles"])
 async def home(request: Request, db: Session = Depends(get_db)):
     articles = crud.get_all_articles(db=db)
     return templates.TemplateResponse(
@@ -134,15 +148,18 @@ async def home(request: Request, db: Session = Depends(get_db)):
 
 
 @app.get("/article/{article_id}", tags=["articles"])
-async def article(article_id: int):
-    if article_id not in models.fake_articles_db:
+async def article(request: Request, article_id: int, db: Session = Depends(get_db)):
+    article = crud.get_article_by_id(db=db, id=article_id)
+    if not article:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="article doesn't exist"
         )
-    return models.fake_articles_db[article_id]
+    return templates.TemplateResponse(
+        "article.html", {"request": request, "article": article}
+    )
 
 
-@app.post("/new", tags=["articles"])
+@app.post("/new", tags=["articles", "admin"])
 async def new(
     article: schemas.ArticleCreate,
     current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
@@ -156,7 +173,7 @@ async def new(
     return crud.create_article(db=db, article=article)
 
 
-@app.patch("/edit/{article_id}", tags=["articles"])
+@app.patch("/edit/{article_id}", tags=["articles", "admin"])
 async def edit(
     article_id: int,
     new_article: schemas.ArticleCreate,
@@ -173,7 +190,7 @@ async def edit(
     return crud.update_article(db=db, article=db_article, new_article=new_article)
 
 
-@app.delete("/delete/{article_id}/", tags=["articles"])
+@app.delete("/delete/{article_id}/", tags=["articles", "admin"])
 def delete_user(
     article_id: int,
     current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
@@ -194,3 +211,28 @@ async def read_users_me(
     current_user: Annotated[schemas.User, Depends(get_current_user)],
 ):
     return current_user
+
+
+# class NotAuthenticatedException(Exception):
+#     def __init__(self, name: str):
+#         self.name = name
+
+
+# @app.exception_handler(NotAuthenticatedException)
+
+# @app.exception_handler(NotAuthenticatedException)
+# def auth_exception_handler(request: Request, exc: NotAuthenticatedException):
+#     """
+#     Redirect the user to the login page if not logged in
+#     """
+#     return RedirectResponse(url="/login")
+
+
+@app.get("/login", response_class=HTMLResponse)
+def login(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
+@app.post("/login/")
+async def login(data: Annotated[schemas.FormData, Form()]):
+    return data

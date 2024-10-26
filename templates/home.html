@@ -6,8 +6,13 @@
 <body>
     <h1>Personal Blog</h1>
     {% for article in articles %}
-        <p><b>{{ article.title }}</b> {{ article.created_at }}</p>
-        
+        <div>
+            <p>
+                <a href="/article/{{ article.id }}">
+                    <b>{{ article.title }}</b>
+                </a> {{ article.created_at }}
+            </p>
+        </div>
     {% endfor %}
 </body>
 </html>

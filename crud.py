@@ -41,10 +41,14 @@ def get_article_by_id(db: Session, id: int):
 
 
 def get_all_articles(db: Session):
-    articles = db.query(models.Article.title, models.Article.created_at).all()
+    articles = db.query(
+        models.Article.id, models.Article.title, models.Article.created_at
+    ).all()
     articles_json = []
     for article in articles:
-        articles_json.append({"title": article[0], "created_at": article[1]})
+        articles_json.append(
+            {"id": article[0], "title": article[1], "created_at": article[2]}
+        )
     return json.loads(json.dumps(articles_json, default=str))
 
 
