@@ -11,13 +11,10 @@ from fastapi.security import (
 )
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
+from datetime import datetime
 import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi.staticfiles import StaticFiles
-
-# from jinja2 import Template
-
-# from fastapi.exceptions import WebSocketException
 
 
 app = FastAPI(title="Personal Blog")
@@ -63,9 +60,6 @@ async def login_for_access_token(
     access_token = crud.create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
-    # return JSONResponse(
-    #     content={"access_token": access_token, "token_type": "bearer"}, status_code=200
-    # )
     return schemas.Token(access_token=access_token, token_type="bearer")
 
 
@@ -100,17 +94,27 @@ def get_current_active_user(
     return current_user
 
 
-@app.exception_handler(HTTPException)
-async def http_exception_handler(request, exc):
-    if exc.status_code == 401:
-        return RedirectResponse(url="/login")
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+##############################
+# @app.exception_handler(HTTPException)
+# async def http_exception_handler(request, exc):
+#     if exc.status_code == 401:
+#         return RedirectResponse(url="/login")
+#     return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 
-@app.get("/admin", tags=["admin"])
-async def admin(
-    current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
-):
+@app.get("/admin", response_class=HTMLResponse, tags=["admin"])
+async def admin(request: Request, db: Session = Depends(get_db)):
+    articles = crud.get_all_articles(db=db)
+    return templates.TemplateResponse(
+        "admin.html", {"request": request, "articles": articles}
+    )
+
+    # @app.get("/admin", tags=["admin"])
+    # async def admin(
+    #     current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
+    # ):
+    #     return {"message": "Hello Admin"}
+
     if not current_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     return {"message": "Hello Admin"}
@@ -155,7 +159,7 @@ def delete_user(
 async def home(request: Request, db: Session = Depends(get_db)):
     articles = crud.get_all_articles(db=db)
     return templates.TemplateResponse(
-        "home.html", {"request": request, "articles": articles}
+        "home.html", {"request": request, "articles": articles, "datetime": datetime}
     )
 
 
@@ -222,11 +226,11 @@ async def edit(
 @app.delete("/delete/{article_id}/", tags=["articles", "admin"])
 def delete_user(
     article_id: int,
-    current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
+    # current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
     db: Session = Depends(get_db),
 ):
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    # if not current_user.is_superuser:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     db_article = crud.get_article_by_id(db, id=article_id)
     if not db_article:
         raise HTTPException(

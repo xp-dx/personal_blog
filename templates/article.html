@@ -3,11 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/article.css') }}" rel="stylesheet">
     <title>Article</title>
 </head>
 <body>
-    <h1>{{ article.title }}</h1>
-    <p>{{ article.created_at }}</p>
-    <p>{{ article.content }}</p>
+    <div class="main_card">
+        <header class ="header_card">
+            <h1>{{ article.title.title() }} </h1>
+            
+        </header>
+        <main>
+            <div class="articles_card">
+                <h5>{{ article.created_at.strftime("%B %-d, %Y") }}</h5>
+                <p class="content_card">{{ article.content }}</p>
+            </div>
+
+        </main>
+    </div>
+
+
 </body>
 </html>

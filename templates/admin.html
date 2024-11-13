@@ -1,16 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/admin.css') }}" rel="stylesheet">
     <title>Admin panel</title>
 </head>
     
 <body>
+    <div class="main_card">
     <header>
-        <h1>Моё </h1>
-        <button id="themeSwitcher">Сменить тему</button>
+        <h1>Personal blog</h1>
+        <a href="/new">+ Add</a>
     </header>
-    <script src="script.js"></script>
+    
+    <main>
+        <div class="articles_card">
+            {% for article in articles %}
+            <div class="back_article">
+                <b>{{ article.title.title() }}</b>
+                <div class="links">
+                    <a href="/edit/{{ article.id }}">Edit</a>
+                    <a href="/delete/{{ article.id }}" class="delete-link" data-article-id="{{ article.id }}">Delete</a>
+                </div>
+                
+                <!-- <div class="link_container">
+                    <b>{{ article.title.title() }}</b>d
+                    <a href="/edit/{{ article.id }}"></a>
+                </div> -->
+            </div>
+            {% endfor %} 
+        </div>
+        <!-- <script></script> -->
+        <!-- <script src="{{ url_for('static', path='/js/admin.css') }}"></script> -->
+        <!-- <link href="{{ url_for('static', path='/js/admin.css') }}" rel="stylesheet"> -->
+    </main>
+    </div>
+    <script>
+        document.querySelectorAll('.delete-link').forEach(link => {
+            link.addEventListener('click', async event => {
+              event.preventDefault();
+              const articleId = link.dataset.articleId;
+              const response = await fetch(`/delete/${articleId}/`, {
+                method: 'DELETE',
+              });
+              if (response.ok) {
+
+                // handle success
+              } else {
+                // handle error
+              }
+            });
+          });
+    </script>
+
 </body>
 </html>

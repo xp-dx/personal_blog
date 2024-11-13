@@ -1,0 +1,35 @@
+header {
+    display: flex;
+    justify-content: space-between;
+
+}
+
+.back_article {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* .links b {
+    margin-left: auto;
+} */
+
+header a {
+    /* background-color: aqua; */
+    align-self: flex-end; 
+    text-decoration: none;
+    color: #FEFAE0;
+    
+}
+
+.links {
+    /* display: flex;
+    justify-content: space-around;
+    background-color: red; */
+    padding: 0 30px;
+
+}
+
+.links a {
+    text-decoration: none;
+    color: #FEFAE0;
+}

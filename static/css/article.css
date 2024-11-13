@@ -1,0 +1,12 @@
+.header_card {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .header_card h1 {
+    display: inline-block;
+  }
+
+h5 {
+    margin: 0px;
+  }

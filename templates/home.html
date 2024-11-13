@@ -2,24 +2,28 @@
 <html>
 <head>
     <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/home.css') }}" rel="stylesheet">
     <title>Home</title>
 </head>
 <body>
-    <div class="all_card">
+    <div class="main_card">
     <header>
         <h1>Personal Blog</h1>
     </header>
     <main>
         <div class="articles_card">
             {% for article in articles %}
-                <div>
-                    <p>
-                        <a href="/article/{{ article.id }}">
-                            <b>{{ article.title }}</b>
-                        </a> 
-                        <span>{{ article.created_at }}</span>
-                    </p>
-                </div>
+            <div class="back_article">
+                <a href="/article/{{ article.id }}">
+                    <div class="link_container">
+                        <b>{{ article.title.title() }}</b>
+                        <span>{{ datetime.strptime(article.created_at, "%Y-%m-%d %H:%M:%S.%f")
+                            .strftime("%B %-d, %Y") 
+                        }}</span>
+                    </div>
+                    
+                </a> 
+            </div>
             {% endfor %} 
         </div>
         <!-- <img src="{{ url_for('static', path='/img/ABSOLUTE2.gif') }}" alt="Image description"> -->

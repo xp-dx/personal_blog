@@ -1,0 +1,42 @@
+.articles_card a {
+    padding: 20px;
+    margin: 17px 0;
+    background-color: #e5e0bf;
+    /* background-color: #f0b26a; */
+    
+    border-radius: 10px;
+    display: block;
+    text-decoration: none;
+    color: #283618;
+    transition: 0.2s ease-in-out;
+}
+
+.articles_card a:hover {
+    /* background-color: #cd9758; */
+    background-color: #aba78e;
+
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+
+    margin-right: 10px;
+
+}
+
+.link_container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.link_container b {
+    margin-right: auto;
+  }
+  
+.link_container span {
+    margin-left: auto;
+    color: #283618dc;
+  }
+
+.back_article {
+  background-color: #1e2912;
+  border-radius: 10px;
+
+}
