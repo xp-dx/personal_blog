@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from datetime import datetime
 
 
@@ -39,6 +39,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+    scopes: list[str] = []
 
 
 class FormData(BaseModel):

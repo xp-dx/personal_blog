@@ -1,0 +1,45 @@
+body {
+    /* background: url("../img/ABSOLUTE2.gif") no-repeat center center fixed;
+    background-size: cover;
+    min-width: 500%; */
+    margin: 20px;
+    background-color: #DDA15E;
+    font-family: Arial, sans-serif;
+    color: #FEFAE0;
+    
+}
+
+.all_card {
+    padding: 20px;
+    background-color: #606C38;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 1);
+
+
+}
+
+.articles_card {
+    /* margin: 20px; */
+    padding: 20px;
+    background-color: #283618;
+    color: #283618;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.articles_card p {
+    padding: 20px;
+    
+    background-color: #f0b26a;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.articles_card p a {
+    margin-right: auto;
+  }
+  
+  .articles_card p span {
+    margin-left: auto;
+  }

@@ -1,14 +1,19 @@
 from fastapi import FastAPI, HTTPException, Request, status, Depends, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from . import models, schemas, crud, config
 from datetime import timedelta
 from typing import Annotated
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import (
+    OAuth2PasswordBearer,
+    OAuth2PasswordRequestForm,
+    SecurityScopes,
+)
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
 import jwt
 from jwt.exceptions import InvalidTokenError
+from fastapi.staticfiles import StaticFiles
 
 # from jinja2 import Template
 
@@ -16,6 +21,11 @@ from jwt.exceptions import InvalidTokenError
 
 
 app = FastAPI(title="Personal Blog")
+
+
+app.mount("/static", StaticFiles(directory="./personal_blog/static"), name="static")
+
+
 templates = Jinja2Templates(directory="./personal_blog/templates")
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -23,7 +33,7 @@ credentials_exception = HTTPException(
     headers={"WWW-Authenticate": "Bearer"},
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 models.Base.metadata.create_all(engine)
 
 
@@ -35,7 +45,7 @@ def get_db():
         db.close()
 
 
-@app.post("/token")
+@app.post("/login")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
@@ -53,6 +63,9 @@ async def login_for_access_token(
     access_token = crud.create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
+    # return JSONResponse(
+    #     content={"access_token": access_token, "token_type": "bearer"}, status_code=200
+    # )
     return schemas.Token(access_token=access_token, token_type="bearer")
 
 
@@ -87,16 +100,32 @@ def get_current_active_user(
     return current_user
 
 
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request, exc):
+    if exc.status_code == 401:
+        return RedirectResponse(url="/login")
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
 @app.get("/admin", tags=["admin"])
 async def admin(
-    current_user: Annotated[schemas.User, Depends(get_current_user)],
-    db: Session = Depends(get_db),
+    current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
 ):
-    if not current_user:
-        return RedirectResponse(url="/login")
     if not current_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     return {"message": "Hello Admin"}
+
+
+# @app.get("/admin", tags=["admin"])
+# async def admin(
+#     current_user: Annotated[schemas.User, Depends(get_current_user)],
+#     db: Session = Depends(get_db),
+# ):
+#     if not current_user:
+#         return RedirectResponse(url="/login")
+#     if not current_user.is_superuser:
+#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+#     return {"message": "Hello Admin"}
 
 
 @app.post("/user/create/", tags=["users", "admin"], response_model=schemas.User)
@@ -218,13 +247,16 @@ async def read_users_me(
 #         self.name = name
 
 
-# @app.exception_handler(NotAuthenticatedException)
-
+# # @app.exception_handler(NotAuthenticatedException)
 # @app.exception_handler(NotAuthenticatedException)
 # def auth_exception_handler(request: Request, exc: NotAuthenticatedException):
 #     """
 #     Redirect the user to the login page if not logged in
 #     """
+#     return JSONResponse(
+#         status_code=418,
+#         content={"message": f"Oops! {exc.name} did something. There goes a rainbow..."},
+#     )
 #     return RedirectResponse(url="/login")
 
 
@@ -233,6 +265,8 @@ def login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-@app.post("/login/")
-async def login(data: Annotated[schemas.FormData, Form()]):
-    return data
+# @app.post("/login")
+# async def login(
+#     data: Annotated[schemas.FormData, Form()], db: Session = Depends(get_db)
+# ):
+#     return "wqd"
