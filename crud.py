@@ -66,7 +66,8 @@ def create_article(db: Session, article: schemas.ArticleCreate):
     db.add(db_artcile)
     db.commit()
     db.refresh(db_artcile)
-    return db_artcile
+    return {"message": "Successfully created article"}
+    # return db_artcile
 
 
 def delete_user(db: Session, db_user: schemas.User):

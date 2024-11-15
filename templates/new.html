@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/new.css') }}" rel="stylesheet">
+    <title>New</title>
+</head>
+<body>
+    <div class="main_card">
+        <header class ="header_card">
+            <h1>New article</h1>
+            
+        </header>
+        <main>
+            <div class="articles_card">
+                <form method="POST" enctype="application/x-www-form-urlencoded">
+                    <div class="inputs">
+                        <input class="title data" type="text" placeholder="Article Title" 
+                        name="title" autocomplete="off" required>
+                        <!-- <input class="date data" type="text" placeholder="Publishing Date" 
+                        name="date" autocomplete="off" required> -->
+                        <textarea
+                            class="content data" type="text" placeholder="Content" name="content"
+                            rows="15" autocapitalize="off" required
+                        ></textarea>
+                        <!-- <input class="content" type="text" placeholder="Content" name="content"> -->
+                    </div>
+                    <div class="btn-container">
+                        <button class="btn-publish" type="submit">Publish</button>
+                    </div>
+                </form>
+            </div>
+
+        </main>
+    </div>
+    <script>
+        /*
+        const form = document.getElementById('aticle-form');
+
+        form.addEventListener('submit', (e) => {
+            const formData = new FormData(form);
+            console.log(formData);
+            alert('Article created successfully!');
+        }
+        /*
+        function create_article() {
+            const title = document.querySelector('.title').value;
+            const content = document.querySelector('.content').value;
+            const response = fetch('/new', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
+                },
+                body: JSON.stringify({ title, content }),
+              });
+            
+            if (response.ok) {
+                alert('Article created successfully!');
+            } else {
+                console.error('Article creation error:', response.status, response.statusText);
+                alert('Error creating article. More details in the console.');
+            }
+        }
+        const button = document.querySelector('.btn-publish');
+        button.addEventListener('click', create_article);*/
+
+            /* fetch('/new', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, content, date })*/
+    </script>
+</body>
+</html>

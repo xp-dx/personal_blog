@@ -192,29 +192,56 @@ async def article(request: Request, article_id: int, db: Session = Depends(get_d
     )
 
 
+@app.get("/new", response_class=HTMLResponse, tags=["articles", "admin"])
+def new_get(
+    request: Request,
+):
+    # if not current_user.is_superuser:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    return templates.TemplateResponse("new.html", {"request": request})
+
+
 @app.post("/new", tags=["articles", "admin"])
-async def new(
-    article: schemas.ArticleCreate,
-    current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
+async def new_post(
+    article: Annotated[schemas.ArticleCreate, Form()],
+    # current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
     db: Session = Depends(get_db),
 ):
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    # if not current_user.is_superuser:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     db_article = crud.get_article_by_title(db, title=article.title)
     if db_article:
         raise HTTPException(status_code=404, detail="Article already exists")
     return crud.create_article(db=db, article=article)
 
 
+@app.get("/edit/{article_id}", response_class=HTMLResponse, tags=["articles", "admin"])
+def edit_get(
+    request: Request,
+    article_id: int,
+    db: Session = Depends(get_db),
+):
+    # if not current_user.is_superuser:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    db_article = crud.get_article_by_id(db, id=article_id)
+    if not db_article:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Article doesn't exist"
+        )
+    return templates.TemplateResponse(
+        "edit.html", {"request": request, "article": db_article}
+    )
+
+
 @app.patch("/edit/{article_id}", tags=["articles", "admin"])
 async def edit(
     article_id: int,
-    new_article: schemas.ArticleCreate,
-    current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
+    new_article: schemas.ArticleUpdate,
+    # current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
     db: Session = Depends(get_db),
 ):
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    # if not current_user.is_superuser:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     db_article = crud.get_article_by_id(db, id=article_id)
     if not db_article:
         raise HTTPException(

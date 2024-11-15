@@ -10,6 +10,10 @@ class ArticleCreate(ArticleBase):
     content: str
 
 
+class ArticleUpdate(ArticleCreate):
+    created_at: datetime
+
+
 class Article(ArticleCreate):
     id: int
     created_at: datetime

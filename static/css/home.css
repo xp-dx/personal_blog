@@ -1,7 +1,9 @@
 .articles_card a {
     padding: 20px;
     margin: 17px 0;
-    background-color: #e5e0bf;
+    background-color: #FEFAE0;
+    /* background-color: #9da180; */
+    /* background-color: #e5e0bf; */
     /* background-color: #f0b26a; */
     
     border-radius: 10px;
@@ -36,7 +38,8 @@
   }
 
 .back_article {
-  background-color: #1e2912;
+  background-color: #505238;
+  /* background-color: #1e2912; */
   border-radius: 10px;
 
 }

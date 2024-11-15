@@ -10,3 +10,7 @@
 h5 {
     margin: 0px;
   }
+  
+.content {
+    word-wrap: break-word;
+  }

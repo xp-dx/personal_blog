@@ -1,0 +1,43 @@
+.inputs {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .data {
+    margin-top: 17px;
+    background-color: #FEFAE0;
+  }
+
+  .title, .date {
+    /* height: 15px; */
+    /* padding: 5px 10px 5px 10px; */
+    padding: 20px;
+    border-radius: 10px;
+
+    border:1px solid #999;
+  }
+
+  .content {
+    padding: 20px;
+    border:1px solid #999;
+    border-radius: 10px;
+  }
+
+  /* .btn-container {
+    display: flex;
+    justify-content: flex-end;
+  } */
+  
+  .btn-publish {
+    margin-top: 10px;
+    background-color: #FEFAE0;
+    width: 40%;
+    padding: 20px;
+    border-radius: 5px;
+    border:1px solid #999;
+    cursor: pointer;
+  }
+
+  .btn-publish:hover {
+    background-color: #aba78e;
+  }

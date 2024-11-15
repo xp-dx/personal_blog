@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', path='/css/new.css') }}" rel="stylesheet">
+    <title>Edit</title>
+</head>
+<body>
+    <div class="main_card">
+        <header class ="header_card">
+            <h1>Update article</h1>
+            
+        </header>
+        <main>
+            <div class="articles_card">
+                <form>
+                    <div class="inputs">
+                        <input 
+                            class="title data" type="text" placeholder="Article Title" 
+                            name="title" autocomplete="off" value="{{ article.title }}" required
+                        >
+                        <input 
+                            class="date data" type="text" placeholder="Publishing Date" 
+                            name="date" autocomplete="off" value="{{ article.created_at }}" 
+                            required
+                        > 
+                        <textarea
+                            class="content data" type="text" placeholder="Content" name="content"
+                            rows="15" autocapitalize="off" required
+                        >{{ article.content }}</textarea>
+                        <!-- <input class="content" type="text" placeholder="Content" name="content"> -->
+                    </div>
+                    <div class="btn-container">
+                        <button class="btn-publish" type="submit">Update</button>
+                    </div>
+                </form>
+            </div>
+
+        </main>
+    </div>
+</body>
+</html>
