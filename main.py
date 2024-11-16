@@ -236,7 +236,7 @@ def edit_get(
 @app.patch("/edit/{article_id}", tags=["articles", "admin"])
 async def edit(
     article_id: int,
-    new_article: schemas.ArticleUpdate,
+    new_article: Annotated[schemas.ArticleUpdate, Form()],
     # current_user: Annotated[schemas.Admin, Depends(get_current_active_user)],
     db: Session = Depends(get_db),
 ):

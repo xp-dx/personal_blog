@@ -83,9 +83,10 @@ def delete_article(db: Session, db_article: schemas.Article):
 
 
 def update_article(
-    db: Session, article: schemas.Article, new_article: schemas.ArticleCreate
+    db: Session, article: schemas.Article, new_article: schemas.ArticleUpdate
 ):
     article.title = new_article.title
+    article.created_at = new_article.created_at
     article.content = new_article.content
     db.add(article)
     db.commit()

@@ -13,27 +13,92 @@
         </header>
         <main>
             <div class="articles_card">
-                <form method="POST" enctype="application/x-www-form-urlencoded">
+                <form>
                     <div class="inputs">
                         <input class="title data" type="text" placeholder="Article Title" 
                         name="title" autocomplete="off" required>
-                        <!-- <input class="date data" type="text" placeholder="Publishing Date" 
-                        name="date" autocomplete="off" required> -->
                         <textarea
                             class="content data" type="text" placeholder="Content" name="content"
                             rows="15" autocapitalize="off" required
                         ></textarea>
-                        <!-- <input class="content" type="text" placeholder="Content" name="content"> -->
                     </div>
                     <div class="btn-container">
-                        <button class="btn-publish" type="submit">Publish</button>
+                        <button class="btn-publish">Publish</button>
                     </div>
                 </form>
             </div>
 
         </main>
     </div>
-    <script>
+    <script src="{{ url_for('static', path='/js/newArticle.js') }}">
+        /*
+        const form = document.querySelector('.articles_card form');
+        const titleInput = document.querySelector('.title.data');
+        const contentInput = document.querySelector('.content.data');
+
+        form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const title = titleInput.value;
+        const content = contentInput.value;
+
+        const response =fetch('/new', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `title=${title}&content=${content}`,
+        })
+        .then((response) => {
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+          })
+        
+        .then((data) => {
+            alert('Article created successfully!');
+            console.log(data);
+          })
+        .catch((error) => {
+            alert('Error creating article. More details in the console.');
+            console.error(error);
+          });
+        });
+        */
+                
+        
+        /*
+            // Get the input elements
+        const titleInput = document.querySelector('.title.data');
+        const contentInput = document.querySelector('.content.data');
+
+        // Add an event listener to the publish button
+        document.querySelector('.btn-publish').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent the default form submission
+
+        // Get the input values
+        const title = titleInput.value;
+        const content = contentInput.value;
+
+        // Create a JSON payload
+        const payload = {
+            title,
+            content
+        };
+
+        // Send a POST request to your server
+        fetch('/new', {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then((response) => response.json())
+        .then((data) => console.log(data))
+        .catch((error) => console.error(error));
+        });*/
         /*
         const form = document.getElementById('aticle-form');
 
