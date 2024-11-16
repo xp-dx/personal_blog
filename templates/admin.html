@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=2.0"> -->
     <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', path='/css/admin.css') }}" rel="stylesheet">
     <title>Admin panel</title>
@@ -13,60 +10,23 @@
     <div class="main_card">
     <header>
         <h1>Personal Blog</h1>
-        <!-- <a href="/new">+ Add</a> -->
     </header>
     
     <main>
         <div class="articles_card">
             <a class="add-link" href="/new">+ Add</a>
-
             {% for article in articles %}
             <div class="article_container">
               <span class="back_article">
                 <a class="article_title" href="/article/{{ article.id }}"><b class="title">{{ article.title.title() }}</b></a>
               </span>
-                
                 <a class="edit-link" href="/edit/{{ article.id }}">Edit</a>
                 <a class="delete-link" href="/delete/{{ article.id }}" class="delete-link" data-article-id="{{ article.id }}">Delete</a>
-                
-                <!-- <div class="link_container">
-                    <b>{{ article.title.title() }}</b>d
-                    <a href="/edit/{{ article.id }}"></a>
-                </div> -->
             </div>
             {% endfor %} 
         </div>
-        <!-- <script></script> -->
-        <!-- <script src="{{ url_for('static', path='/js/admin.css') }}"></script> -->
-        <!-- <link href="{{ url_for('static', path='/js/admin.css') }}" rel="stylesheet"> -->
     </main>
     </div>
-    <script src="{{ url_for('static', path='/js/deleteArticle.js') }}">
-      /*
-        document.querySelectorAll('.delete-link').forEach(link => {
-            link.addEventListener('click', async event => {
-              event.preventDefault();
-              const articleId = link.dataset.articleId;
-              if (confirm('Are you sure you want to delete this article?\nThis action cannot be undone.')) {
-                const response = await fetch(`/delete/${articleId}/`, {
-                  method: 'DELETE',
-                });
-                if (response.ok) {
-                  link.closest('.article_container').remove();
-                  // document.querySelector('.article_container').remove();
-                  // handle success
-                } else {
-                  console.error('Article deletion error:', response.status, response.statusText);
-                  if (response.status == 404){
-                    alert('Error deleting article. Article not found.');
-                  }
-                  alert('Error deleting article. More details in the console.');
-                  // handle error
-                  }
-              }
-            });
-          });
-          */
-    </script>
+    <script src="{{ url_for('static', path='/js/deleteArticle.js') }}"></script>
 </body>
 </html>
