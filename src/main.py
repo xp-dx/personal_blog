@@ -7,7 +7,6 @@ from typing import Annotated
 from fastapi.security import (
     OAuth2PasswordBearer,
     OAuth2PasswordRequestForm,
-    SecurityScopes,
 )
 from .database import engine, SessionLocal
 from sqlalchemy.orm import Session
@@ -16,14 +15,16 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi.staticfiles import StaticFiles
 
-
-app = FastAPI(title="Personal Blog")
-
-
-app.mount("/static", StaticFiles(directory="./personal_blog/static"), name="static")
+# from fastapi_users.authentication import BearerTransport
 
 
-templates = Jinja2Templates(directory="./personal_blog/templates")
+app = FastAPI(title="Personal Blog", version="0.1.9")
+
+
+app.mount("/static", StaticFiles(directory="./static"), name="static")
+
+
+templates = Jinja2Templates(directory="./templates")
 credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Could not validate credentials",
@@ -31,6 +32,7 @@ credentials_exception = HTTPException(
 )
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+# bearer_transport = BearerTransport(tokenUrl="/login")
 models.Base.metadata.create_all(engine)
 
 
@@ -103,7 +105,15 @@ def get_current_active_user(
 
 
 @app.get("/admin", response_class=HTMLResponse, tags=["admin"])
-async def admin(request: Request, db: Session = Depends(get_db)):
+async def admin(
+    request: Request,
+    current_user: Annotated[schemas.Admin, Depends(get_current_user)],
+    db: Session = Depends(get_db),
+):
+    if not current_user:
+        return RedirectResponse(url="/login")
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     articles = crud.get_all_articles(db=db)
     return templates.TemplateResponse(
         "admin.html", {"request": request, "articles": articles}

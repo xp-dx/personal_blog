@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="{{ url_for('static', path='/js/authentication.js') }}"></script>
     <link href="{{ url_for('static', path='/css/style.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', path='/css/admin.css') }}" rel="stylesheet">
     <title>Admin panel</title>
@@ -21,7 +22,7 @@
                 <a class="article_title" href="/article/{{ article.id }}"><b class="title">{{ article.title.title() }}</b></a>
               </span>
                 <a class="edit-link" href="/edit/{{ article.id }}">Edit</a>
-                <a class="delete-link" href="/delete/{{ article.id }}" class="delete-link" data-article-id="{{ article.id }}">Delete</a>
+                <a class="delete-link" href="/delete/{{ article.id }}" data-article-id="{{ article.id }}">Delete</a>
             </div>
             {% endfor %} 
         </div>

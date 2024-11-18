@@ -43,7 +43,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
-    scopes: list[str] = []
+    # scopes: list[str] = []
 
 
 class FormData(BaseModel):

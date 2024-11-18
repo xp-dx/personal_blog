@@ -24,6 +24,7 @@
       </form>
   </div>
   <script>
+    /*
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [, setToken] = useState('');
@@ -49,19 +50,36 @@
     const handleSubmit = (event) => {
       event.preventDefault();
       submitLogin();
-    };
-    <!-- const form = document.getElementById('login-form');
+    };*/
+    const form = document.getElementById('login-form');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const response = await fetch('/login', {
-        method: 'GET',
+        method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams(Object.fromEntries(new FormData(form))).toString()
       });
       const token = await response.json();
       localStorage.setItem('access_token', token.access_token);
       localStorage.setItem('token_type', token.token_type);
-    }); -->
+      /*
+      const authHeader = `Bearer ${token.access_token}`;
+      fetch('/admin', {
+        method: 'GET',
+        headers: {
+          'Authorization': authHeader
+        }
+      })
+      .then(response => response.text())
+      .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const body = doc.body;
+        document.body.innerHTML = html;
+        history.pushState({}, '', '/admin');
+      })
+      .catch(error => console.error(error));*/
+    });
   </script>
 </body>
 </html>
