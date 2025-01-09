@@ -23,11 +23,11 @@ fetch('/new', {
   })
 
 .then((data) => {
-    alert('Article created successfully!');
+    alert('Note created successfully!');
     console.log(data);
   })
 .catch((error) => {
-    alert('Error creating article. More details in the console.');
+    alert('Error creating note. More details in the console.');
     console.error(error);
   });
 });

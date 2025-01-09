@@ -107,13 +107,13 @@ def get_current_active_user(
 @app.get("/admin", response_class=HTMLResponse, tags=["admin"])
 async def admin(
     request: Request,
-    current_user: Annotated[schemas.Admin, Depends(get_current_user)],
+    # current_user: Annotated[schemas.Admin, Depends(get_current_user)],
     db: Session = Depends(get_db),
 ):
-    if not current_user:
-        return RedirectResponse(url="/login")
-    if not current_user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+    # if not current_user:
+    #     return RedirectResponse(url="/login")
+    # if not current_user.is_superuser:
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
     articles = crud.get_all_articles(db=db)
     return templates.TemplateResponse(
         "admin.html", {"request": request, "articles": articles}
